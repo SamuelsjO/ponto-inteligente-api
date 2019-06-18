@@ -1,0 +1,47 @@
+[33mcommit 1e8d1270e7eddafce79685bc8b7ebd4fcce27cab[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: De Souza Oliveira <sjsouza@indracompany.com>
+Date:   Mon Jun 17 23:54:31 2019 -0300
+
+    Commit adicionando classes
+
+[33mcommit 6dd07d34ae8fb8c5c2feba05a82f6bacabd71705[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: De Souza Oliveira <sjsouza@indracompany.com>
+Date:   Mon Jun 17 19:56:11 2019 -0300
+
+    Commit de configuraçao do banco de dados
+
+[33mcommit c9669e266ff96384a260d5555ae5adee215cdba6[m
+Author: De Souza Oliveira <sjsouza@indracompany.com>
+Date:   Mon Jun 17 19:50:11 2019 -0300
+
+    commit de novos pacotes e classes da api
+
+[33mcommit ccb50f2b83c67140c4556789a7117b5b50b3e23b[m
+Author: De Souza Oliveira <sjsouza@indracompany.com>
+Date:   Mon Jun 17 15:12:52 2019 -0300
+
+    Commit de configuraçao de banco de dados MySql
+
+[33mcommit 3b58aff5668dd69e9c499babb4f881aeb507323a[m
+Author: De Souza Oliveira <sjsouza@indracompany.com>
+Date:   Mon Jun 10 23:17:57 2019 -0300
+
+    Adicionado badge do travisCI ao repository
+
+[33mcommit ca73f8b29ec48c7181acb6c858e25733847a272f[m
+Author: De Souza Oliveira <sjsouza@indracompany.com>
+Date:   Mon Jun 10 23:12:45 2019 -0300
+
+    Configurando o travis
+
+[33mcommit 9104b525025ebcbb39f67fdf1704a15f0c06af41[m
+Author: De Souza Oliveira <sjsouza@indracompany.com>
+Date:   Mon Jun 10 23:02:08 2019 -0300
+
+    Commit inicial dos arquivos do projeto
+
+[33mcommit 6e9cfeed165311beb74da7ae00805017a4d4ae78[m
+Author: SamuelsjO <samucagm@rocketmail.com>
+Date:   Mon Jun 10 22:58:58 2019 -0300
+
+    Initial commit

@@ -25,7 +25,7 @@ import javax.persistence.Transient;
 import com.samuelTI.pontointeligente.api.enums.PerfilEnum;
 
 @Entity
-@Table(name = "funcioanarios")
+@Table(name = "funcionario")
 public class Funcionario implements Serializable{
 
 	/**
@@ -71,7 +71,7 @@ public class Funcionario implements Serializable{
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Empresa empresa;
 	
-	@OneToMany(mappedBy = "fucionario" , fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "funcionario" , fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Lancamento> lancamentos;
 	
 	public Funcionario() {
