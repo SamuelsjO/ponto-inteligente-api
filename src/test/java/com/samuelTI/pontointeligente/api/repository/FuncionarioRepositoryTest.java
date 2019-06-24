@@ -1,4 +1,4 @@
-package com.samuelTI.pontointeligente.api.repositoy;
+package com.samuelTI.pontointeligente.api.repository;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

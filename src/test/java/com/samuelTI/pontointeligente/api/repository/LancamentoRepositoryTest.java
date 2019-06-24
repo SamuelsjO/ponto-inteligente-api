@@ -1,4 +1,4 @@
-package com.samuelTI.pontointeligente.api.repositoy;
+package com.samuelTI.pontointeligente.api.repository;
 
 import static org.junit.Assert.assertEquals;
 
@@ -62,17 +62,15 @@ public class LancamentoRepositoryTest {
 	}
 	
 	@Test
-	public void testBuscarLancamentoByFuncionario() {
-		
+	public void testBuscarLancamentosPorFuncionarioId() {
 		List<Lancamento> lancamentos = this.lancamentoRepository.findByFuncionarioId(funcionarioId);
 		
 		assertEquals(2, lancamentos.size());
-		
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Test
-	public void tesBuscarLancamentoFuncionarioPaginado() {
-		
+	public void testBuscarLancamentosPorFuncionarioIdPaginado() {
 		PageRequest page = new PageRequest(0, 10);
 		Page<Lancamento> lancamentos = this.lancamentoRepository.findByFuncionarioId(funcionarioId, page);
 		
