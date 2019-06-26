@@ -11,10 +11,10 @@ public interface LancamentoService {
 
 	Page<Lancamento> buscarPorFuncionario(Long funcionarioId, PageRequest pageRequest);
 
-	Optional<Optional<Lancamento>> buscarById(Long id);
-
 	Lancamento persitir(Lancamento lancamento);
 
 	void remover(Long id);
+
+	Optional<Lancamento> buscarById(Long id);
 
 }
