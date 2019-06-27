@@ -26,7 +26,7 @@ import com.samuelTI.pontointeligente.api.services.FuncionarioService;
 import com.samuelTI.pontointeligente.api.utils.PasswordUtils;
 
 @RestController
-@RequestMapping(path = "/api/cadastrapj")
+@RequestMapping(path = "/api/cadastra-pj")
 @CrossOrigin(origins = "*")
 public class CadastroPJController {
 
