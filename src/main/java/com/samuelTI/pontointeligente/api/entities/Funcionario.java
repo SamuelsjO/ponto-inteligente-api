@@ -53,7 +53,7 @@ public class Funcionario implements Serializable{
 	private BigDecimal valorHora;
 	
 	@Column(name = "qtdHoras_Trabalhdas_dia", nullable = true)
-	private Float qtHorasTrabalhadas_dia;
+	private Float qtdHorasTrabalhadas_dia;
 	
 	@Column(name = "qtd_horas_almoco", nullable = true)
 	private Float qtdHorasAlmoco;
@@ -133,14 +133,14 @@ public class Funcionario implements Serializable{
 
 	@Transient
 	public Optional<Float> getQtdHorasTrabalhoDiaOpt(){
-		return Optional.ofNullable(qtHorasTrabalhadas_dia);
+		return Optional.ofNullable(qtdHorasTrabalhadas_dia);
 	}
-	public Float getQtHorasTrabalhadas_dia() {
-		return qtHorasTrabalhadas_dia;
+	public Float getQtdHorasTrabalhadas_dia() {
+		return qtdHorasTrabalhadas_dia;
 	}
 
-	public void setQtHorasTrabalhadas_dia(Float qtHorasTrabalhadas_dia) {
-		this.qtHorasTrabalhadas_dia = qtHorasTrabalhadas_dia;
+	public void setQtdHorasTrabalhadas_dia(Float qtHorasTrabalhadas_dia) {
+		this.qtdHorasTrabalhadas_dia = qtHorasTrabalhadas_dia;
 	}
 
 	public Float getQtdHorasAlmoco() {
@@ -210,7 +210,7 @@ public class Funcionario implements Serializable{
 	@Override
 	public String toString() {
 		return "Funcionario [nome=" + nome + ", email=" + email + ", senha=" + senha + ", cpf=" + cpf + ", valorHora="
-				+ valorHora + ", qtHorasTrabalhadas_dia=" + qtHorasTrabalhadas_dia + ", qtdHorasAlmoco="
+				+ valorHora + ", qtHorasTrabalhadas_dia=" + qtdHorasTrabalhadas_dia + ", qtdHorasAlmoco="
 				+ qtdHorasAlmoco + ", perfil=" + perfil + ", dataCriacao=" + dataCriacao + ", dataAtualizacao="
 				+ dataAtualizacao + ", empresa=" + empresa + ", lancamentos=" + lancamentos + "]";
 	}

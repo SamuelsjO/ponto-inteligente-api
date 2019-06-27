@@ -6,7 +6,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.br.CNPJ;
 import org.hibernate.validator.constraints.br.CPF;
 
-public class CadastroPJDto {
+public class CadastroPessoaJuridicaDto {
 
 	private Long id;
 	private String nome;
@@ -26,7 +26,7 @@ public class CadastroPJDto {
 		this.cpf = cpf;
 	}
 
-	public CadastroPJDto() {
+	public CadastroPessoaJuridicaDto() {
 
 	}
 

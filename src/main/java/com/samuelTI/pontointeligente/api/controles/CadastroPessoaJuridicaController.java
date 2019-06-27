@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.samuelTI.pontointeligente.api.dtos.CadastroPJDto;
+import com.samuelTI.pontointeligente.api.dtos.CadastroPessoaJuridicaDto;
 import com.samuelTI.pontointeligente.api.entities.Empresa;
 import com.samuelTI.pontointeligente.api.entities.Funcionario;
 import com.samuelTI.pontointeligente.api.enums.PerfilEnum;
@@ -28,9 +28,9 @@ import com.samuelTI.pontointeligente.api.utils.PasswordUtils;
 @RestController
 @RequestMapping(path = "/api/cadastra-pj")
 @CrossOrigin(origins = "*")
-public class CadastroPJController {
+public class CadastroPessoaJuridicaController {
 
-	private static final Logger log = LoggerFactory.getLogger(CadastroPJController.class);
+	private static final Logger log = LoggerFactory.getLogger(CadastroPessoaJuridicaController.class);
 
 	@Autowired
 	private FuncionarioService funcionarioService;
@@ -38,26 +38,23 @@ public class CadastroPJController {
 	@Autowired
 	private EmpresaService empresaService;
 
-	public CadastroPJController() {
+	public CadastroPessoaJuridicaController() {
 
 	}
 
-	/*
+	/**
 	 * Cadastra uma nova pessoa juridica no sistema
-	 * 
+     *
 	 * @param cadastroPJDto
-	 * 
-	 * @param result
-	 * 
+	 * @param result 
 	 * @return ResponseEntity<Response<CadastroPJDto>>
-	 * 
 	 * @throws NoSuchAlgorithmException
 	 */
 	@PostMapping
-	public ResponseEntity<Response<CadastroPJDto>> cadastrar(@Valid @RequestBody CadastroPJDto cadastroPJDto,
+	public ResponseEntity<Response<CadastroPessoaJuridicaDto>> cadastrar(@Valid @RequestBody CadastroPessoaJuridicaDto cadastroPJDto,
 			BindingResult result) throws NoSuchAlgorithmException {
 		log.info("Cadastrando PJ: {}", cadastroPJDto.toString());
-		Response<CadastroPJDto> response = new Response<CadastroPJDto>();
+		Response<CadastroPessoaJuridicaDto> response = new Response<CadastroPessoaJuridicaDto>();
 
 		validaDadosExistentes(cadastroPJDto, result);
 		Empresa empresa = this.convertDtoByEmpresa(cadastroPJDto);
@@ -77,16 +74,15 @@ public class CadastroPJController {
 		return ResponseEntity.ok(response);
 	}
 
-	/*
+	/**
 	 * Verifica se a a empresa ou funcionario ja existe na base de dados.
 	 * 
 	 * @param cadastroPJDto
-	 * 
 	 * @param result
 	 * 
 	 */
 
-	private void validaDadosExistentes(CadastroPJDto cadastroPJDto, BindingResult result) {
+	private void validaDadosExistentes(CadastroPessoaJuridicaDto cadastroPJDto, BindingResult result) {
 
 		this.empresaService.buscarPorCnpj(cadastroPJDto.getCnpj())
 				.ifPresent(emp -> result.addError(new ObjectError("empresa", "Empresa já exisente")));
@@ -97,15 +93,14 @@ public class CadastroPJController {
 
 	}
 
-	/*
+	/**
 	 * Converte os dados do DTO para empresa..
 	 * 
 	 * @param cadastroPJDto
-	 * 
 	 * @param result
 	 * 
 	 */
-	private Empresa convertDtoByEmpresa(CadastroPJDto cadastroPJDto) {
+	private Empresa convertDtoByEmpresa(CadastroPessoaJuridicaDto cadastroPJDto) {
 		Empresa empresa = new Empresa();
 		empresa.setCnpj(cadastroPJDto.getCnpj());
 		empresa.setRazaoSocial(cadastroPJDto.getRazaoSocial());
@@ -113,21 +108,17 @@ public class CadastroPJController {
 		return empresa;
 	}
 
-	/*
+	/**
 	 * Converte os dados do DTO para funcionario
 	 * 
-	 * @param cadastroPJDto
-	 * 
-	 * @param result
-	 * 
+	 * @param cadastroPJDto 
+	 * @param result 
 	 * @param Funcionario
-	 * 
 	 * @param NoSuchAlgorithmExecption
-	 * 
 	 * @return funcionario
 	 * 
 	 */
-	private Funcionario convertDtoByFuncionario(CadastroPJDto cadastroPJDto, BindingResult result)
+	private Funcionario convertDtoByFuncionario(CadastroPessoaJuridicaDto cadastroPJDto, BindingResult result)
 			throws NoSuchAlgorithmException {
 		Funcionario funcionario = new Funcionario();
 		funcionario.setNome(funcionario.getNome());
@@ -139,16 +130,15 @@ public class CadastroPJController {
 		return funcionario;
 	}
 
-	/*
+	/**
 	 * Popula o DTO de cadastro com os dados do funcionario e empresa
 	 * 
-	 * @param funcionario
-	 * 
+	 * @param funcionario 
 	 * @return cadastroPJDto
 	 * 
 	 */
-	private CadastroPJDto convertCadastroPJDto(Funcionario funcionario) {
-		CadastroPJDto cadastroPJDto = new CadastroPJDto();
+	private CadastroPessoaJuridicaDto convertCadastroPJDto(Funcionario funcionario) {
+		CadastroPessoaJuridicaDto cadastroPJDto = new CadastroPessoaJuridicaDto();
 		cadastroPJDto.setId(funcionario.getId());
 		cadastroPJDto.setNome(funcionario.getNome());
 		cadastroPJDto.setEmail(funcionario.getEmail());

@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.br.CNPJ;
 import org.hibernate.validator.constraints.br.CPF;
 
-public class CadastroPFDto {
+public class CadastroPessoaFisicaDto {
 
 	private Long id;
 	private String nome;
@@ -21,7 +21,7 @@ public class CadastroPFDto {
 	private Optional<String> qtdHorasAlmoco = Optional.empty();
 	private String cnpj;
 
-	public CadastroPFDto() {
+	public CadastroPessoaFisicaDto() {
 
 	}
 
