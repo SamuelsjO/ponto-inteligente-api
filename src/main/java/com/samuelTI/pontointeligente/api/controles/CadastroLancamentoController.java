@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.hibernate.hql.internal.NameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
