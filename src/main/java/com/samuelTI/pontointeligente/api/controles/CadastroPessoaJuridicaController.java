@@ -121,11 +121,11 @@ public class CadastroPessoaJuridicaController {
 	private Funcionario convertDtoByFuncionario(CadastroPessoaJuridicaDto cadastroPJDto, BindingResult result)
 			throws NoSuchAlgorithmException {
 		Funcionario funcionario = new Funcionario();
-		funcionario.setNome(funcionario.getNome());
-		funcionario.setEmail(funcionario.getEmail());
-		funcionario.setCpf(funcionario.getCpf());
+		funcionario.setNome(cadastroPJDto.getNome());
+		funcionario.setEmail(cadastroPJDto.getEmail());
+		funcionario.setCpf(cadastroPJDto.getCpf());
 		funcionario.setPerfil(PerfilEnum.ROLE_ADMIN);
-		funcionario.setSenha(PasswordUtils.gerarByCrypt(funcionario.getSenha()));
+		funcionario.setSenha(PasswordUtils.gerarByCrypt(cadastroPJDto.getSenha()));
 
 		return funcionario;
 	}

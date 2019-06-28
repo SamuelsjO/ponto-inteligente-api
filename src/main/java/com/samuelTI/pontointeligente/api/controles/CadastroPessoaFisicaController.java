@@ -28,7 +28,7 @@ import com.samuelTI.pontointeligente.api.services.FuncionarioService;
 import com.samuelTI.pontointeligente.api.utils.PasswordUtils;
 
 @RestController
-@RequestMapping("/api/cadastrar-pf")
+@RequestMapping("/api/cadastra-pf")
 @CrossOrigin(origins = "*")
 public class CadastroPessoaFisicaController {
 
@@ -65,7 +65,6 @@ public class CadastroPessoaFisicaController {
 		if (result.hasErrors()) {
 			log.info("Erro validando dados de Cadastro de PF: {}", result.getAllErrors());
 			result.getAllErrors().forEach(error -> response.getErrors().add(error.getDefaultMessage()));
-			// return ResponseEntity.badRequest().body(response);
 			return ResponseEntity.badRequest().body(response);
 		}
 
