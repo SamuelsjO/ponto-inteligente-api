@@ -10,7 +10,7 @@ public class CadastroLancamentoDto {
 	private String data;
 	private String tipo;
 	private String descricao;
-	private String localazicao;
+	private String localizacao;
 	private Long funcionarioId;
 
 	public CadastroLancamentoDto() {
@@ -50,12 +50,12 @@ public class CadastroLancamentoDto {
 		this.descricao = descricao;
 	}
 
-	public String getLocalazicao() {
-		return localazicao;
+	public String getLocalizacao() {
+		return localizacao;
 	}
 
-	public void setLocalazicao(String localazicao) {
-		this.localazicao = localazicao;
+	public void setLocalizacao(String localizacao) {
+		this.localizacao = localizacao;
 	}
 
 	public Long getFuncionarioId() {
@@ -69,7 +69,7 @@ public class CadastroLancamentoDto {
 	@Override
 	public String toString() {
 		return "CadastroLancamentoDto [id=" + id + ", data=" + data + ", tipo=" + tipo + ", descricao=" + descricao
-				+ ", localazicao=" + localazicao + ", funcionarioId=" + funcionarioId + "]";
+				+ ", localazicao=" + localizacao + ", funcionarioId=" + funcionarioId + "]";
 	}
 
 }

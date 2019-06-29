@@ -2,6 +2,7 @@ package com.samuelTI.pontointeligente.api.dtos;
 
 import java.util.Optional;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 import org.hibernate.validator.constraints.Length;
@@ -40,6 +41,7 @@ public class CadastroFuncionarioDto {
 
 	@NotEmpty(message = "Email não pode ser vazio.")
 	@Length(min = 5, max = 200, message = "Email deve conter entre 5 e 200 caracteres")
+	@Email(message = "Email invalido")
 	public String getEmail() {
 		return email;
 	}
