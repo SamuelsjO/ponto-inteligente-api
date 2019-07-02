@@ -8,7 +8,11 @@ import java.security.NoSuchAlgorithmException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.samuelTI.pontointeligente.api.entities.Empresa;
 import com.samuelTI.pontointeligente.api.entities.Funcionario;
@@ -17,6 +21,9 @@ import com.samuelTI.pontointeligente.api.repository.EmpresaRepository;
 import com.samuelTI.pontointeligente.api.repository.FuncionarioRepository;
 import com.samuelTI.pontointeligente.api.utils.PasswordUtils;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class FuncionarioRepositoryTest {
 
 	@Autowired
@@ -68,7 +75,7 @@ public class FuncionarioRepositoryTest {
 	}
 
 	@Test
-	public void testBuscarFuncionarioByCpfnvalid() {
+	public void testBuscarFuncionarioByCpfInvalid() {
 		Funcionario funcionario = this.funcionarioRepository.findByCpfOrEmail("1234567878", EMAIL);
 
 		assertNotNull(funcionario);
