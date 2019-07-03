@@ -1,5 +1,5 @@
 
-package com.samuelTI.pontointeligente.api.controles;
+package com.samuelTI.pontointeligente.api.controllers;
 
 import java.math.BigDecimal;
 import java.util.Optional;

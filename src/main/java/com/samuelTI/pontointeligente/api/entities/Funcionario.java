@@ -52,7 +52,7 @@ public class Funcionario implements Serializable{
 	@Column(name = "valor_Hora", nullable = true)
 	private BigDecimal valorHora;
 	
-	@Column(name = "qtdHoras_Trabalhdas_dia", nullable = true)
+	@Column(name = "qtd_horas_trabalho_dia", nullable = true)
 	private Float qtdHorasTrabalhadas_dia;
 	
 	@Column(name = "qtd_horas_almoco", nullable = true)

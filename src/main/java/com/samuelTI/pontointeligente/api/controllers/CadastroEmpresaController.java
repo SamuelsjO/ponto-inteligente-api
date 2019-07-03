@@ -1,4 +1,4 @@
-package com.samuelTI.pontointeligente.api.controles;
+package com.samuelTI.pontointeligente.api.controllers;
 
 import java.util.Optional;
 
