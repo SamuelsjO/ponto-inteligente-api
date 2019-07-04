@@ -40,9 +40,9 @@ import com.sun.xml.messaging.saaj.packaging.mime.internet.ParseException;
 @RestController
 @RequestMapping("/api/lancamentos")
 @CrossOrigin(origins = "*")
-public class CadastroLancamentoController {
+public class LancamentoController {
 
-	private static final Logger log = LoggerFactory.getLogger(CadastroLancamentoController.class);
+	private static final Logger log = LoggerFactory.getLogger(LancamentoController.class);
 	private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	@Autowired
@@ -54,7 +54,7 @@ public class CadastroLancamentoController {
 	@Value("${paginacao.qtd_por_pagina}")
 	private int qtdPorPagina;
 
-	public CadastroLancamentoController() {
+	public LancamentoController() {
 
 	}
 

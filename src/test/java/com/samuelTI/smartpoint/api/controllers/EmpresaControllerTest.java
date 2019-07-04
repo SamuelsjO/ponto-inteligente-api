@@ -28,7 +28,7 @@ import com.samuelTI.smartpoint.api.services.EmpresaService;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-public class CadastroEmpresaControllerTest {
+public class EmpresaControllerTest {
 
 	@Autowired
 	private MockMvc mvc;

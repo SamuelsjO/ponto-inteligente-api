@@ -35,7 +35,7 @@ import com.samuelTI.smartpoint.api.services.LancamentoService;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-public class CadastroLancamentoControllerTest {
+public class LancamentoControllerTest {
 
 	@Autowired
 	private MockMvc mvc;

@@ -20,14 +20,14 @@ import com.samuelTI.smartpoint.api.services.EmpresaService;
 @RestController
 @RequestMapping("/api/empresas")
 @CrossOrigin(origins = "*")
-public class CadastroEmpresaController {
+public class EmpresaController {
 
-	private static final Logger log = LoggerFactory.getLogger(CadastroEmpresaController.class);
+	private static final Logger log = LoggerFactory.getLogger(EmpresaController.class);
 
 	@Autowired
 	private EmpresaService empresaService;
 
-	public CadastroEmpresaController() {
+	public EmpresaController() {
 
 	}
 

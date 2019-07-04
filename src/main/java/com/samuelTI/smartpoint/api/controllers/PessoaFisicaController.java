@@ -30,9 +30,9 @@ import com.samuelTI.smartpoint.api.utils.PasswordUtils;
 @RestController
 @RequestMapping("/api/cadastra-pf")
 @CrossOrigin(origins = "*")
-public class CadastroPessoaFisicaController {
+public class PessoaFisicaController {
 
-	private static final Logger log = LoggerFactory.getLogger(CadastroPessoaFisicaController.class);
+	private static final Logger log = LoggerFactory.getLogger(PessoaFisicaController.class);
 
 	@Autowired
 	private EmpresaService empresaService;
@@ -40,7 +40,7 @@ public class CadastroPessoaFisicaController {
 	@Autowired
 	private FuncionarioService funcionarioService;
 
-	public CadastroPessoaFisicaController() {
+	public PessoaFisicaController() {
 
 	}
 	/**

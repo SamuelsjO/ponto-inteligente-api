@@ -28,14 +28,14 @@ import com.samuelTI.smartpoint.api.utils.PasswordUtils;
 @RestController
 @RequestMapping("/api/funcionarios")
 @CrossOrigin(origins = "*")
-public class CadastroFuncionarioController {
+public class FuncionarioController {
 
-	private static final Logger log = LoggerFactory.getLogger(CadastroFuncionarioController.class);
+	private static final Logger log = LoggerFactory.getLogger(FuncionarioController.class);
 
 	@Autowired
 	private FuncionarioService funcionarioService;
 
-	public CadastroFuncionarioController() {
+	public FuncionarioController() {
 
 	}
 
