@@ -10,7 +10,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.samuelTI</groupId>
-	<artifactId>Ponto-Inteligente</artifactId>
+	<artifactId>Smart-Point</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>PontoInteligente</name>
 	<description>API para o sistema de Ponto Inteligente</description>
