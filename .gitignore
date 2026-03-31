@@ -27,3 +27,13 @@ HELP.md
 
 ### VS Code ###
 .vscode/
+
+### Docker ###
+pgdata/
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Env ###
+.env

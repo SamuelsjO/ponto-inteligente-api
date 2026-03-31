@@ -1,97 +1,42 @@
 package com.samuelTI.smartpoint.api.dtos;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.br.CNPJ;
 import org.hibernate.validator.constraints.br.CPF;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString(exclude = "senha")
 public class CadastroPessoaJuridicaDto {
 
 	private Long id;
-	private String nome;
-	private String email;
-	private String senha;
-	private String razaoSocial;
-	private String cnpj;
-	private String cpf;
 
-	@NotEmpty(message = "CPF can not be empty.")
-	@CPF(message = "Invalid CPF.")
-	public String getCpf() {
-		return cpf;
-	}
-
-	public void setCpf(String cpf) {
-		this.cpf = cpf;
-	}
-
-	public CadastroPessoaJuridicaDto() {
-
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	@NotEmpty(message = "Name can not be empty")
+	@NotEmpty(message = "Name can not be empty.")
 	@Length(min = 3, max = 200, message = "Name must contain between 3 and 200 characters.")
-	public String getNome() {
-		return nome;
-	}
-
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+	private String nome;
 
 	@NotEmpty(message = "Email can not be empty.")
 	@Length(min = 5, max = 200, message = "Email must contain between 5 and 200 characters.")
-	public String getEmail() {
-		return email;
-	}
+	private String email;
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	@NotEmpty(message = "Password can not be empty")
-	public String getSenha() {
-		return senha;
-	}
-
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
+	@NotEmpty(message = "Password can not be empty.")
+	private String senha;
 
 	@NotEmpty(message = "Social reason can not be empty.")
-	@Length(min = 5, max = 200, message = "Social reason must contain between 5 and 200 characteres.")
-	public String getRazaoSocial() {
-		return razaoSocial;
-	}
-
-	public void setRazaoSocial(String razaoSocial) {
-		this.razaoSocial = razaoSocial;
-	}
+	@Length(min = 5, max = 200, message = "Social reason must contain between 5 and 200 characters.")
+	private String razaoSocial;
 
 	@NotEmpty(message = "CNPJ can not be empty.")
 	@CNPJ(message = "Invalid CNPJ.")
-	public String getCnpj() {
-		return cnpj;
-	}
+	private String cnpj;
 
-	public void setCnpj(String cnpj) {
-		this.cnpj = cnpj;
-	}
-
-	@Override
-	public String toString() {
-		return "CadastroPJDto [id=" + id + ", nome=" + nome + ", email=" + email + ", senha=" + senha + ", razaoSocial="
-				+ razaoSocial + ", cnpj=" + cnpj + "]";
-	}
-	
-
+	@NotEmpty(message = "CPF can not be empty.")
+	@CPF(message = "Invalid CPF.")
+	private String cpf;
 }

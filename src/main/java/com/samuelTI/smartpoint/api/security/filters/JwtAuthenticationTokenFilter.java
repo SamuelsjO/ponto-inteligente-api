@@ -2,39 +2,46 @@ package com.samuelTI.smartpoint.api.security.filters;
 
 import java.io.IOException;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.samuelTI.smartpoint.api.security.utils.JwtTokenUtil;
 
+@Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
 	private static final String AUTH_HEADER = "Authorization";
 	private static final String BEARER_PREFIX = "Bearer ";
 
-	@Autowired
-	private UserDetailsService userDetailsService;
+	private final UserDetailsService userDetailsService;
+	private final JwtTokenUtil jwtTokenUtil;
 
-	@Autowired
-	private JwtTokenUtil jwtTokenUtil;
+	public JwtAuthenticationTokenFilter(UserDetailsService userDetailsService, JwtTokenUtil jwtTokenUtil) {
+		this.userDetailsService = userDetailsService;
+		this.jwtTokenUtil = jwtTokenUtil;
+	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
-		String token = request.getHeader(AUTH_HEADER);
-		if (token != null && token.startsWith(BEARER_PREFIX)) {
-			token = token.substring(7);
+
+		String header = request.getHeader(AUTH_HEADER);
+		if (header == null || !header.startsWith(BEARER_PREFIX)) {
+			chain.doFilter(request, response);
+			return;
 		}
+
+		String token = header.substring(BEARER_PREFIX.length());
 		String username = jwtTokenUtil.getUsernameFromToken(token);
 
 		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -50,5 +57,4 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
 		chain.doFilter(request, response);
 	}
-
 }

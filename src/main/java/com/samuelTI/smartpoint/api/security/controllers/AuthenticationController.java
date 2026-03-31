@@ -2,12 +2,9 @@ package com.samuelTI.smartpoint.api.security.controllers;
 
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,72 +24,56 @@ import com.samuelTI.smartpoint.api.security.dto.JwtAuthenticationDto;
 import com.samuelTI.smartpoint.api.security.dto.TokenDto;
 import com.samuelTI.smartpoint.api.security.utils.JwtTokenUtil;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "*")
 public class AuthenticationController {
 
-	private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 	private static final String TOKEN_HEADER = "Authorization";
 	private static final String BEARER_PREFIX = "Bearer ";
 
-	@Autowired
-	private AuthenticationManager authenticationManager;
+	private final AuthenticationManager authenticationManager;
+	private final JwtTokenUtil jwtTokenUtil;
+	private final UserDetailsService userDetailsService;
 
-	@Autowired
-	private JwtTokenUtil jwtTokenUtil;
-
-	@Autowired
-	private UserDetailsService userDetailsService;
-
-	/**
-	 * Generates and return a new JWT token.
-	 * 
-	 * @param authenticationDto
-	 * @param result
-	 * @return ResponseEntity<Response<TokenDto>>
-	 * @throws AuthenticationException
-	 */
 	@PostMapping
 	public ResponseEntity<Response<TokenDto>> gerarTokenJwt(@Valid @RequestBody JwtAuthenticationDto authenticationDto,
 			BindingResult result) throws AuthenticationException {
-		Response<TokenDto> response = new Response<TokenDto>();
+		var response = new Response<TokenDto>();
 
 		if (result.hasErrors()) {
-			log.error("Error validating launch: {}", result.getAllErrors());
+			log.error("Error validating: {}", result.getAllErrors());
 			result.getAllErrors().forEach(error -> response.getErrors().add(error.getDefaultMessage()));
 			return ResponseEntity.badRequest().body(response);
 		}
 
-		log.info("Generates token for email {}.", authenticationDto.getEmail());
+		log.info("Generating token for email {}.", authenticationDto.email());
 		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(authenticationDto.getEmail(), authenticationDto.getSenha()));
+				new UsernamePasswordAuthenticationToken(authenticationDto.email(), authenticationDto.senha()));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationDto.getEmail());
+		UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationDto.email());
 		String token = jwtTokenUtil.obterToken(userDetails);
 		response.setData(new TokenDto(token));
 
 		return ResponseEntity.ok(response);
 	}
 
-	/**
-	 * Generates a new token with a new expiration date.
-	 * 
-	 * @param request
-	 * @return ResponseEntity<Response<TokenDto>>
-	 */
 	@PostMapping(value = "/refresh")
 	public ResponseEntity<Response<TokenDto>> gerarRefreshTokenJwt(HttpServletRequest request) {
-		log.info("Generates refresh token JWT.");
-		Response<TokenDto> response = new Response<TokenDto>();
+		log.info("Generating refresh JWT token.");
+		var response = new Response<TokenDto>();
 		Optional<String> token = Optional.ofNullable(request.getHeader(TOKEN_HEADER));
 
 		if (token.isPresent() && token.get().startsWith(BEARER_PREFIX)) {
-			token = Optional.of(token.get().substring(7));
+			token = Optional.of(token.get().substring(BEARER_PREFIX.length()));
 		}
 
-		if (!token.isPresent()) {
+		if (token.isEmpty()) {
 			response.getErrors().add("Token not informed.");
 		} else if (!jwtTokenUtil.tokenValido(token.get())) {
 			response.getErrors().add("Token Invalid or Expired.");
@@ -108,5 +88,4 @@ public class AuthenticationController {
 
 		return ResponseEntity.ok(response);
 	}
-
 }

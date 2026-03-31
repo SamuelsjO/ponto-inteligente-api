@@ -1,20 +1,21 @@
 package com.samuelTI.smartpoint.api.repository;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.samuelTI.smartpoint.api.entities.Empresa;
-import com.samuelTI.smartpoint.api.repository.EmpresaRepository;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 public class EmpresaRepositoryTest {
@@ -25,24 +26,25 @@ public class EmpresaRepositoryTest {
 	private static final String COMPANYTEST = "HERE, COMPANY EXAMPLE";
 	private static final String CNPJ = "51463645000100";
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	public void setUp() {
 		Empresa empresa = new Empresa();
 		empresa.setRazaoSocial(COMPANYTEST);
 		empresa.setCnpj(CNPJ);
+		empresa.setDataCriacao(LocalDateTime.now());
+		empresa.setDataAtualizacao(LocalDateTime.now());
 		this.empresaRepository.save(empresa);
-
 	}
 
-	@After
-	public final void tearDown() {
+	@AfterEach
+	public void tearDown() {
 		this.empresaRepository.deleteAll();
 	}
 
 	@Test
 	public void testBuscarPorCnpj() {
-		Empresa empresa = this.empresaRepository.findByCnpj(CNPJ);
-
-		assertEquals(CNPJ, empresa.getCnpj());
+		Optional<Empresa> empresa = this.empresaRepository.findByCnpj(CNPJ);
+		assertTrue(empresa.isPresent());
+		assertEquals(CNPJ, empresa.get().getCnpj());
 	}
 }

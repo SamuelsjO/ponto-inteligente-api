@@ -1,16 +1,10 @@
 package com.samuelTI.smartpoint.api.controllers;
 
-import java.security.NoSuchAlgorithmException;
+import jakarta.validation.Valid;
 
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,128 +19,76 @@ import com.samuelTI.smartpoint.api.services.EmpresaService;
 import com.samuelTI.smartpoint.api.services.FuncionarioService;
 import com.samuelTI.smartpoint.api.utils.PasswordUtils;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/api/cadastra-pj")
-@CrossOrigin(origins = "*")
 public class PessoaJuridicaController {
 
-	private static final Logger log = LoggerFactory.getLogger(PessoaJuridicaController.class);
+	private final FuncionarioService funcionarioService;
+	private final EmpresaService empresaService;
 
-	@Autowired
-	private FuncionarioService funcionarioService;
-
-	@Autowired
-	private EmpresaService empresaService;
-
-	public PessoaJuridicaController() {
-
-	}
-
-	/**
-	 * Register a new legal person in the system
-     *
-	 * @param cadastroPJDto
-	 * @param result 
-	 * @return ResponseEntity<Response<CadastroPJDto>>
-	 * @throws NoSuchAlgorithmException
-	 */
 	@PostMapping
-	public ResponseEntity<Response<CadastroPessoaJuridicaDto>> cadastrar(@Valid @RequestBody CadastroPessoaJuridicaDto cadastroPJDto,
-			BindingResult result) throws NoSuchAlgorithmException {
-		log.info("PJ registering: {}", cadastroPJDto.toString());
-		Response<CadastroPessoaJuridicaDto> response = new Response<CadastroPessoaJuridicaDto>();
+	public ResponseEntity<Response<CadastroPessoaJuridicaDto>> cadastrar(
+			@Valid @RequestBody CadastroPessoaJuridicaDto dto, BindingResult result) {
+		log.info("PJ registering: {}", dto);
+		var response = new Response<CadastroPessoaJuridicaDto>();
 
-		validaDadosExistentes(cadastroPJDto, result);
-		Empresa empresa = this.convertDtoByEmpresa(cadastroPJDto);
-		Funcionario funcionario = this.convertDtoByFuncionario(cadastroPJDto, result);
-		
-		if(result.hasErrors()) {
+		validaDadosExistentes(dto, result);
+		var empresa = convertDtoByEmpresa(dto);
+		var funcionario = convertDtoByFuncionario(dto);
+
+		if (result.hasErrors()) {
 			log.error("Error validating registration data of PJ: {}", result.getAllErrors());
 			result.getAllErrors().forEach(error -> response.getErrors().add(error.getDefaultMessage()));
 			return ResponseEntity.badRequest().body(response);
 		}
-		
-		this.empresaService.persitEmpresa(empresa);
-		funcionario.setEmpresa(empresa);
-		this.funcionarioService.persitirFunc(funcionario);
-		
-		response.setData(this.convertCadastroPJDto(funcionario));
+
+		empresaService.persitEmpresa(empresa);
+		funcionario.setEmpresaId(empresa.getId());
+		funcionarioService.persitirFunc(funcionario);
+
+		response.setData(convertCadastroPJDto(funcionario, empresa));
 		return ResponseEntity.ok(response);
 	}
 
-	/**
-	 * Checks if the company or official already exists in the database.
-	 * 
-	 * @param cadastroPJDto
-	 * @param result
-	 * 
-	 */
-
-	private void validaDadosExistentes(CadastroPessoaJuridicaDto cadastroPJDto, BindingResult result) {
-
-		this.empresaService.buscarPorCnpj(cadastroPJDto.getCnpj())
+	private void validaDadosExistentes(CadastroPessoaJuridicaDto dto, BindingResult result) {
+		empresaService.buscarPorCnpj(dto.getCnpj())
 				.ifPresent(emp -> result.addError(new ObjectError("empresa", "Existing Company")));
-		this.funcionarioService.buscarPorCpf(cadastroPJDto.getCpf())
+		funcionarioService.buscarPorCpf(dto.getCpf())
 				.ifPresent(func -> result.addError(new ObjectError("Funcionario", "Existing CPF")));
-		this.funcionarioService.buscarPorEmail(cadastroPJDto.getEmail())
+		funcionarioService.buscarPorEmail(dto.getEmail())
 				.ifPresent(func -> result.addError(new ObjectError("Funcionario", "Existing Email")));
-
 	}
 
-	/**
-	 * Converts DTO data to enterprise.
-	 * 
-	 * @param cadastroPJDto
-	 * @param result
-	 * 
-	 */
-	private Empresa convertDtoByEmpresa(CadastroPessoaJuridicaDto cadastroPJDto) {
-		Empresa empresa = new Empresa();
-		empresa.setCnpj(cadastroPJDto.getCnpj());
-		empresa.setRazaoSocial(cadastroPJDto.getRazaoSocial());
-
+	private Empresa convertDtoByEmpresa(CadastroPessoaJuridicaDto dto) {
+		var empresa = new Empresa();
+		empresa.setCnpj(dto.getCnpj());
+		empresa.setRazaoSocial(dto.getRazaoSocial());
 		return empresa;
 	}
 
-	/**
-	 * Converts DTO data to official
-	 * 
-	 * @param cadastroPJDto 
-	 * @param result 
-	 * @param Funcionario
-	 * @param NoSuchAlgorithmExecption
-	 * @return funcionario
-	 * 
-	 */
-	private Funcionario convertDtoByFuncionario(CadastroPessoaJuridicaDto cadastroPJDto, BindingResult result)
-			throws NoSuchAlgorithmException {
-		Funcionario funcionario = new Funcionario();
-		funcionario.setNome(cadastroPJDto.getNome());
-		funcionario.setEmail(cadastroPJDto.getEmail());
-		funcionario.setCpf(cadastroPJDto.getCpf());
+	private Funcionario convertDtoByFuncionario(CadastroPessoaJuridicaDto dto) {
+		var funcionario = new Funcionario();
+		funcionario.setNome(dto.getNome());
+		funcionario.setEmail(dto.getEmail());
+		funcionario.setCpf(dto.getCpf());
 		funcionario.setPerfil(PerfilEnum.ROLE_ADMIN);
-		funcionario.setSenha(PasswordUtils.gerarByCrypt(cadastroPJDto.getSenha()));
-
+		funcionario.setSenha(PasswordUtils.gerarByCrypt(dto.getSenha()));
 		return funcionario;
 	}
 
-	/**
-	 * Populate the DTO to register with the data of the official and company
-	 * 
-	 * @param funcionario 
-	 * @return cadastroPJDto
-	 * 
-	 */
-	private CadastroPessoaJuridicaDto convertCadastroPJDto(Funcionario funcionario) {
-		CadastroPessoaJuridicaDto cadastroPJDto = new CadastroPessoaJuridicaDto();
-		cadastroPJDto.setId(funcionario.getId());
-		cadastroPJDto.setNome(funcionario.getNome());
-		cadastroPJDto.setEmail(funcionario.getEmail());
-		cadastroPJDto.setCpf(funcionario.getCpf());
-		cadastroPJDto.setRazaoSocial(funcionario.getEmpresa().getRazaoSocial());
-		cadastroPJDto.setCnpj(funcionario.getEmpresa().getCnpj());
-
-		return cadastroPJDto;
+	private CadastroPessoaJuridicaDto convertCadastroPJDto(Funcionario funcionario, Empresa empresa) {
+		var dto = new CadastroPessoaJuridicaDto();
+		dto.setId(funcionario.getId());
+		dto.setNome(funcionario.getNome());
+		dto.setEmail(funcionario.getEmail());
+		dto.setCpf(funcionario.getCpf());
+		dto.setRazaoSocial(empresa.getRazaoSocial());
+		dto.setCnpj(empresa.getCnpj());
+		return dto;
 	}
-
 }

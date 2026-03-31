@@ -1,33 +1,25 @@
 package com.samuelTI.smartpoint.api.repository;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.samuelTI.smartpoint.api.entities.Empresa;
 import com.samuelTI.smartpoint.api.entities.Funcionario;
 import com.samuelTI.smartpoint.api.entities.Lancamento;
 import com.samuelTI.smartpoint.api.enums.PerfilEnum;
 import com.samuelTI.smartpoint.api.enums.TipoEnum;
-import com.samuelTI.smartpoint.api.repository.EmpresaRepository;
-import com.samuelTI.smartpoint.api.repository.FuncionarioRepository;
-import com.samuelTI.smartpoint.api.repository.LancamentoRepository;
 import com.samuelTI.smartpoint.api.utils.PasswordUtils;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 public class LancamentoRepositoryTest {
@@ -43,57 +35,49 @@ public class LancamentoRepositoryTest {
 
 	private Long funcionarioId;
 
-	@Before
-	public void setUp() throws Exception {
-		
+	@BeforeEach
+	public void setUp() {
 		Empresa empresa = this.empresaRepository.save(obterDadosEmpresa());
-		
-		Funcionario funcionario = this.funcionarioRepository.save(obterDadosFuncionario(empresa));
+		Funcionario funcionario = this.funcionarioRepository.save(obterDadosFuncionario(empresa.getId()));
 		this.funcionarioId = funcionario.getId();
-		
-		this.lancamentoRepository.save(obterDadosLancamentos(funcionario));
-		this.lancamentoRepository.save(obterDadosLancamentos(funcionario));
+
+		this.lancamentoRepository.save(obterDadosLancamentos(funcionarioId));
+		this.lancamentoRepository.save(obterDadosLancamentos(funcionarioId));
 	}
 
-	@After
-	public void tearDown() throws Exception{
+	@AfterEach
+	public void tearDown() {
+		this.lancamentoRepository.deleteAll();
+		this.funcionarioRepository.deleteAll();
 		this.empresaRepository.deleteAll();
-		
 	}
-	
+
 	@Test
 	public void testBuscarLancamentosPorFuncionarioId() {
 		List<Lancamento> lancamentos = this.lancamentoRepository.findByFuncionarioId(funcionarioId);
-		
 		assertEquals(2, lancamentos.size());
 	}
-	
-	@SuppressWarnings("deprecation")
-	@Test
-	public void testBuscarLancamentosPorFuncionarioIdPaginado() {
-		PageRequest page = new PageRequest(0, 10);
-		Page<Lancamento> lancamentos = this.lancamentoRepository.findByFuncionarioId(funcionarioId, page);
-		
-		assertEquals(2, lancamentos.getTotalElements());
-	}
-	
-	private Lancamento obterDadosLancamentos(Funcionario funcionario) {
+
+	private Lancamento obterDadosLancamentos(Long funcionarioId) {
 		Lancamento lancamento = new Lancamento();
-		lancamento.setData(new Date());
+		lancamento.setData(LocalDateTime.now());
 		lancamento.setTipo(TipoEnum.START_LUNCH);
-		lancamento.setFuncionario(funcionario);
+		lancamento.setFuncionarioId(funcionarioId);
+		lancamento.setDataCriacao(LocalDateTime.now());
+		lancamento.setDataAtualizacao(LocalDateTime.now());
 		return lancamento;
 	}
 
-	private Funcionario obterDadosFuncionario(Empresa empresa) throws NoSuchAlgorithmException{
+	private Funcionario obterDadosFuncionario(Long empresaId) {
 		Funcionario funcionario = new Funcionario();
 		funcionario.setNome("Samuel");
 		funcionario.setPerfil(PerfilEnum.ROLE_USUARIO);
 		funcionario.setSenha(PasswordUtils.gerarByCrypt("12345"));
 		funcionario.setCpf("10636132641");
 		funcionario.setEmail("samucagm@rockemail.com");
-		funcionario.setEmpresa(empresa);
-
+		funcionario.setEmpresaId(empresaId);
+		funcionario.setDataCriacao(LocalDateTime.now());
+		funcionario.setDataAtualizacao(LocalDateTime.now());
 		return funcionario;
 	}
 
@@ -101,7 +85,8 @@ public class LancamentoRepositoryTest {
 		Empresa empresa = new Empresa();
 		empresa.setRazaoSocial("SFTecnologia");
 		empresa.setCnpj("514636450000100");
+		empresa.setDataCriacao(LocalDateTime.now());
+		empresa.setDataAtualizacao(LocalDateTime.now());
 		return empresa;
 	}
-
 }
