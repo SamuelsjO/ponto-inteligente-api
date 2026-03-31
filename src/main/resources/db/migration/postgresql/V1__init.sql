@@ -1,0 +1,33 @@
+CREATE TABLE empresa (
+    id BIGSERIAL PRIMARY KEY,
+    razao_social VARCHAR(255) NOT NULL,
+    cnpj VARCHAR(255) NOT NULL,
+    data_criacao TIMESTAMP NOT NULL,
+    data_atualizacao TIMESTAMP NOT NULL
+);
+
+CREATE TABLE funcionario (
+    id BIGSERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    cpf VARCHAR(255) NOT NULL,
+    valor_hora DECIMAL(19,2),
+    qtd_horas_trabalho_dia REAL,
+    qtd_horas_almoco REAL,
+    perfil VARCHAR(255) NOT NULL,
+    data_criacao TIMESTAMP NOT NULL,
+    data_atualizacao TIMESTAMP NOT NULL,
+    empresa_id BIGINT REFERENCES empresa(id)
+);
+
+CREATE TABLE lancamento (
+    id BIGSERIAL PRIMARY KEY,
+    data TIMESTAMP NOT NULL,
+    descricao VARCHAR(255),
+    localizacao VARCHAR(255),
+    data_criacao TIMESTAMP NOT NULL,
+    data_atualizacao TIMESTAMP NOT NULL,
+    tipo VARCHAR(255) NOT NULL,
+    funcionario_id BIGINT REFERENCES funcionario(id)
+);

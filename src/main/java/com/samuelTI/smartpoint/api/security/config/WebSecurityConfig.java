@@ -1,44 +1,47 @@
 package com.samuelTI.smartpoint.api.security.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.BeanIds;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.samuelTI.smartpoint.api.security.JwtAuthenticationEntryPoint;
 import com.samuelTI.smartpoint.api.security.filters.JwtAuthenticationTokenFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableMethodSecurity(prePostEnabled = true)
+public class WebSecurityConfig {
 
-	@Autowired
-	private JwtAuthenticationEntryPoint unauthorizedHandler;
+	private final JwtAuthenticationEntryPoint unauthorizedHandler;
+	private final JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
-	@Autowired
-	private UserDetailsService userDetailsService;
+	@Value("${cors.allowed-origins:http://localhost:3000}")
+	private String allowedOrigins;
 
-	@Autowired
-	public void configureAuthentication(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-		authenticationManagerBuilder.userDetailsService(this.userDetailsService).passwordEncoder(passwordEncoder());
+	public WebSecurityConfig(JwtAuthenticationEntryPoint unauthorizedHandler,
+			JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter) {
+		this.unauthorizedHandler = unauthorizedHandler;
+		this.jwtAuthenticationTokenFilter = jwtAuthenticationTokenFilter;
 	}
 
-	@Bean(name = BeanIds.AUTHENTICATION_MANAGER)
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+		return authConfig.getAuthenticationManager();
 	}
 
 	@Bean
@@ -47,19 +50,44 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public JwtAuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
-		return new JwtAuthenticationTokenFilter();
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.setAllowedOrigins(List.of(allowedOrigins.split(",")));
+		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+		config.setAllowCredentials(true);
+		config.setMaxAge(3600L);
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+		return source;
 	}
 
-	@Override
-	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity.csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
-				.antMatchers("/auth/**", "/api/cadastra-pj", "/api/cadastra-pf", "/v2/api-docs",
-						"/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**")
-				.permitAll().anyRequest().authenticated();
-		httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
-		httpSecurity.headers().cacheControl();
-	}
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+			// CSRF desabilitado: API stateless com autenticação via JWT (sem cookies de sessão)
+			.csrf(csrf -> csrf.disable())
+			.headers(headers -> headers
+				.frameOptions(frame -> frame.deny())
+				.contentTypeOptions(content -> {})
+			)
+			.exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers(
+					"/auth/**",
+					"/api/cadastra-pj",
+					"/api/cadastra-pf",
+					"/v3/api-docs/**",
+					"/swagger-ui/**",
+					"/swagger-ui.html"
+				).permitAll()
+				.anyRequest().authenticated()
+			);
 
+		http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+		return http.build();
+	}
 }

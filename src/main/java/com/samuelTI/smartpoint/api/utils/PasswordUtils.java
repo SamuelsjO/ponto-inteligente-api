@@ -1,30 +1,18 @@
 package com.samuelTI.smartpoint.api.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class PasswordUtils {
 
-	private static final Logger log = LoggerFactory.getLogger(PasswordUtils.class);
+	private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder();
 
-	public PasswordUtils() {
-		
-	}
-	
-	/*
-	 * Gera um hash utilizando o BCrypt
-	 * 
-	 * @param senha
-	 * @return String
-	 */
-	
 	public static String gerarByCrypt(String senha) {
-		if(senha == null) {
-			return senha;
+		if (senha == null) {
+			return null;
 		}
-		log.info("Generating hash with BCrypt");
-		BCryptPasswordEncoder bCryptEncoder = new BCryptPasswordEncoder();
-		return bCryptEncoder.encode(senha);
+		return ENCODER.encode(senha);
 	}
 }

@@ -1,27 +1,23 @@
 package com.samuelTI.smartpoint.api.repository;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.samuelTI.smartpoint.api.entities.Empresa;
 import com.samuelTI.smartpoint.api.entities.Funcionario;
 import com.samuelTI.smartpoint.api.enums.PerfilEnum;
-import com.samuelTI.smartpoint.api.repository.EmpresaRepository;
-import com.samuelTI.smartpoint.api.repository.FuncionarioRepository;
 import com.samuelTI.smartpoint.api.utils.PasswordUtils;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 public class FuncionarioRepositoryTest {
@@ -35,69 +31,67 @@ public class FuncionarioRepositoryTest {
 	private static final String EMAIL = "samucagm@rocketmail.com";
 	private static final String CPF = "1063621641";
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	public void setUp() {
 		Empresa empresa = this.empresaRepository.save(obterDadosEmpresa());
-		this.funcionarioRepository.save(obterDadosFuncionario(empresa));
+		this.funcionarioRepository.save(obterDadosFuncionario(empresa.getId()));
 	}
 
-	@After
-	public final void tearDown() {
+	@AfterEach
+	public void tearDown() {
+		this.funcionarioRepository.deleteAll();
 		this.empresaRepository.deleteAll();
 	}
 
 	@Test
 	public void testBuscarFuncionarioPorEmail() {
-		Funcionario funcionario = this.funcionarioRepository.findByEmail(EMAIL);
-
-		assertEquals(EMAIL, funcionario.getEmail());
+		Optional<Funcionario> funcionario = this.funcionarioRepository.findByEmail(EMAIL);
+		assertTrue(funcionario.isPresent());
 	}
 
 	@Test
 	public void testBuscarFuncionarioByCpf() {
-		Funcionario funcionario = this.funcionarioRepository.findByCpf(CPF);
-
-		assertEquals(CPF, funcionario.getCpf());
+		Optional<Funcionario> funcionario = this.funcionarioRepository.findByCpf(CPF);
+		assertTrue(funcionario.isPresent());
 	}
 
 	@Test
 	public void testBuscarFuncionarioByCpfEmail() {
-		Funcionario funcionario = this.funcionarioRepository.findByCpfOrEmail(CPF, EMAIL);
-
-		assertNotNull(funcionario);
+		Optional<Funcionario> funcionario = this.funcionarioRepository.findByCpfOrEmail(CPF, EMAIL);
+		assertTrue(funcionario.isPresent());
 	}
 
 	@Test
 	public void testBuscarFuncionarioByEmailInvalid() {
-		Funcionario funcionario = this.funcionarioRepository.findByCpfOrEmail(CPF, "email@invalido.com");
-
-		assertNotNull(funcionario);
+		Optional<Funcionario> funcionario = this.funcionarioRepository.findByCpfOrEmail(CPF, "email@invalido.com");
+		assertTrue(funcionario.isPresent());
 	}
 
 	@Test
 	public void testBuscarFuncionarioByCpfInvalid() {
-		Funcionario funcionario = this.funcionarioRepository.findByCpfOrEmail("1234567878", EMAIL);
-
-		assertNotNull(funcionario);
+		Optional<Funcionario> funcionario = this.funcionarioRepository.findByCpfOrEmail("1234567878", EMAIL);
+		assertTrue(funcionario.isPresent());
 	}
 
-	private Funcionario obterDadosFuncionario(Empresa empresa) throws NoSuchAlgorithmException {
+	private Funcionario obterDadosFuncionario(Long empresaId) {
 		Funcionario funcionario = new Funcionario();
 		funcionario.setNome("Samuel");
 		funcionario.setPerfil(PerfilEnum.ROLE_USUARIO);
 		funcionario.setSenha(PasswordUtils.gerarByCrypt("12345"));
 		funcionario.setCpf(CPF);
 		funcionario.setEmail(EMAIL);
-		funcionario.setEmpresa(empresa);
+		funcionario.setEmpresaId(empresaId);
+		funcionario.setDataCriacao(LocalDateTime.now());
+		funcionario.setDataAtualizacao(LocalDateTime.now());
 		return funcionario;
-
 	}
 
 	private Empresa obterDadosEmpresa() {
 		Empresa empresa = new Empresa();
 		empresa.setRazaoSocial("SFSTecnologia");
 		empresa.setCnpj("51463645000100");
+		empresa.setDataCriacao(LocalDateTime.now());
+		empresa.setDataAtualizacao(LocalDateTime.now());
 		return empresa;
-
 	}
 }
