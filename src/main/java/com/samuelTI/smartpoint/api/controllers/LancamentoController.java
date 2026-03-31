@@ -1,23 +1,17 @@
 package com.samuelTI.smartpoint.api.controllers;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.apache.commons.lang3.EnumUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,248 +23,162 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.samuelTI.smartpoint.api.dtos.CadastroLancamentoDto;
-import com.samuelTI.smartpoint.api.entities.Funcionario;
+import com.samuelTI.smartpoint.api.dtos.PageResult;
 import com.samuelTI.smartpoint.api.entities.Lancamento;
 import com.samuelTI.smartpoint.api.enums.TipoEnum;
 import com.samuelTI.smartpoint.api.responses.Response;
 import com.samuelTI.smartpoint.api.services.FuncionarioService;
 import com.samuelTI.smartpoint.api.services.LancamentoService;
-import com.sun.xml.messaging.saaj.packaging.mime.internet.ParseException;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/lancamentos")
-@CrossOrigin(origins = "*")
 public class LancamentoController {
 
-	private static final Logger log = LoggerFactory.getLogger(LancamentoController.class);
-	private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-	@Autowired
-	private LancamentoService lancamentoService;
-
-	@Autowired
-	private FuncionarioService funcionarioService;
+	private final LancamentoService lancamentoService;
+	private final FuncionarioService funcionarioService;
 
 	@Value("${paginacao.qtd_por_pagina}")
 	private int qtdPorPagina;
 
-	public LancamentoController() {
-
-	}
-
-	/**
-	 * Returns the list of releases of an official.
-	 * 
-	 * @param funcionarioId
-	 * @param ResponseEntity<Response<CadastroLancamentoDto>>
-	 */
-
 	@GetMapping(value = "/funcionario/{funcionarioId}")
-	public ResponseEntity<Response<Page<CadastroLancamentoDto>>> listarPorFuncionarioId(
-			@PathVariable("funcionarioId") Long funcionarioId, 
-			@RequestParam(value = "pag", defaultValue = "0") int pag,
-			@RequestParam(value = "ord", defaultValue = "id") String ord,
-			@RequestParam(value = "dir", defaultValue = "DESC") String dir) {
-		log.info("Find Lancamento bi ID the employee: {}, page: {}", funcionarioId, pag);
-		Response<Page<CadastroLancamentoDto>> response = new Response<Page<CadastroLancamentoDto>>();
+	public ResponseEntity<Response<PageResult<CadastroLancamentoDto>>> listarPorFuncionarioId(
+			@PathVariable("funcionarioId") Long funcionarioId,
+			@RequestParam(value = "pag", defaultValue = "0") int pag) {
+		log.info("Find Lancamento by employee ID: {}, page: {}", funcionarioId, pag);
+		var response = new Response<PageResult<CadastroLancamentoDto>>();
 
-		@SuppressWarnings("deprecation")
-		PageRequest pageRequest = new PageRequest(pag, this.qtdPorPagina, Direction.valueOf(dir), ord);
-		Page<Lancamento> lancaPage = this.lancamentoService.buscarPorFuncionario(funcionarioId, pageRequest);
-		Page<CadastroLancamentoDto> lanPageDto = lancaPage.map(lancamento -> this.convertLancamentoDto(lancamento));
+		PageResult<CadastroLancamentoDto> lanPageDto = lancamentoService
+				.buscarPorFuncionario(funcionarioId, pag, qtdPorPagina)
+				.map(this::convertLancamentoDto);
 
 		response.setData(lanPageDto);
 		return ResponseEntity.ok(response);
 	}
 
-	/**
-	 * Returns a call by ID.
-	 * 
-	 * @param id
-	 * @param ResponseEntity<Response<CadastroLancamentoDto>>
-	 */
-
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<Response<CadastroLancamentoDto>> listarPorId(@PathVariable("id") Long id) {
 		log.info("Find lancamento by ID: {}", id);
-		Response<CadastroLancamentoDto> response = new Response<CadastroLancamentoDto>();
-		Optional<Lancamento> lancamento = this.lancamentoService.buscarById(id);
+		var response = new Response<CadastroLancamentoDto>();
+		Optional<Lancamento> lancamento = lancamentoService.buscarById(id);
 
-		if (!lancamento.isPresent()) {
+		if (lancamento.isEmpty()) {
 			log.info("Lancamento not found for the ID: {}", id);
 			response.getErrors().add("Lancamento not found for the ID " + id);
 			return ResponseEntity.ok(response);
 		}
 
-		response.setData(this.convertLancamentoDto(lancamento.get()));
+		response.setData(convertLancamentoDto(lancamento.get()));
 		return ResponseEntity.ok(response);
 	}
 
-	/**
-	 * Adds a new launch.
-	 * 
-	 * @param lancamento
-	 * @param result
-	 * @return ResponseEntity<Response<LancamentoDto>>
-	 * @throws java.text.ParseException 
-	 * @throws ParseException 
-	 */
-	
 	@PostMapping
-	public ResponseEntity<Response<CadastroLancamentoDto>> adicionar(@Valid @RequestBody CadastroLancamentoDto cadastroLancamentoDto,
-			BindingResult result) throws ParseException, java.text.ParseException{
-		log.info("Adicionando lancamento: {}", cadastroLancamentoDto.toString());
-		Response<CadastroLancamentoDto> response = new Response<CadastroLancamentoDto>();
-		validaFuncionario(cadastroLancamentoDto, result);
-		Lancamento lancamento = this.convertDtoByLancamento(cadastroLancamentoDto, result);
-		
-		if(result.hasErrors()){
+	public ResponseEntity<Response<CadastroLancamentoDto>> adicionar(
+			@Valid @RequestBody CadastroLancamentoDto dto, BindingResult result) {
+		log.info("Adicionando lancamento: {}", dto);
+		var response = new Response<CadastroLancamentoDto>();
+		validaFuncionario(dto, result);
+		Lancamento lancamento = convertDtoByLancamento(dto, result);
+
+		if (result.hasErrors()) {
 			log.error("Error validating lancamento: {}", result.getAllErrors());
 			result.getAllErrors().forEach(error -> response.getErrors().add(error.getDefaultMessage()));
 			return ResponseEntity.badRequest().body(response);
-			
 		}
-		lancamento = this.lancamentoService.persitir(lancamento);
-		response.setData(this.convertLancamentoDto(lancamento));
+		lancamento = lancamentoService.persitir(lancamento);
+		response.setData(convertLancamentoDto(lancamento));
 		return ResponseEntity.ok(response);
-		
 	}
-	/**
-	 * Updates the data for a launch.
-	 * 
-	 * @param id
-	 * @param lancamentoDto
-	 * @return ResponseEntity<Response<Lancamento>>
-	 * @throws ParseException 
-	 */
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<Response<CadastroLancamentoDto>> atualizar(@PathVariable("id") Long id, 
-			@Valid @RequestBody CadastroLancamentoDto cadastroLancamentoDto, BindingResult result)
-			throws ParseException, java.text.ParseException {
-		
-		log.info("Updating lançamento: {}", cadastroLancamentoDto.toString());
-		Response<CadastroLancamentoDto> response = new Response<CadastroLancamentoDto>();
-		validaFuncionario(cadastroLancamentoDto, result);
-		cadastroLancamentoDto.setId(Optional.of(id));
-		Lancamento lancamento = this.convertDtoByLancamento(cadastroLancamentoDto, result);
-		
-		if(result.hasErrors()) {
-			log.error("Error validating lançamento: {}", result.getAllErrors());
+	public ResponseEntity<Response<CadastroLancamentoDto>> atualizar(@PathVariable("id") Long id,
+			@Valid @RequestBody CadastroLancamentoDto dto, BindingResult result) {
+		log.info("Updating lancamento: {}", dto);
+		var response = new Response<CadastroLancamentoDto>();
+		validaFuncionario(dto, result);
+		dto.setId(Optional.of(id));
+		Lancamento lancamento = convertDtoByLancamento(dto, result);
+
+		if (result.hasErrors()) {
+			log.error("Error validating lancamento: {}", result.getAllErrors());
 			result.getAllErrors().forEach(error -> response.getErrors().add(error.getDefaultMessage()));
 			return ResponseEntity.badRequest().body(response);
 		}
-		
-		lancamento = this.lancamentoService.persitir(lancamento);
-		response.setData(this.convertLancamentoDto(lancamento));
-		return ResponseEntity.ok(response);
 
+		lancamento = lancamentoService.persitir(lancamento);
+		response.setData(convertLancamentoDto(lancamento));
+		return ResponseEntity.ok(response);
 	}
-	
-	/**
-	 * Remove the data for a launch.
-	 * 
-	 * @param id
-	 * @return ResponseEntity<Response<Lancamento>>
-	 */
-	
+
 	@DeleteMapping(value = "/{id}")
 	@PreAuthorize("hasAnyRole('ADMIN')")
-	public ResponseEntity<Response<String>> remover(@PathVariable("id") Long id){
+	public ResponseEntity<Response<String>> remover(@PathVariable("id") Long id) {
 		log.info("Removing lancamento: {}", id);
-		Response<String> response = new Response<String>();
-		Optional<Lancamento> lancamento = this.lancamentoService.buscarById(id);
-		
-		if(!lancamento.isPresent()) {
+		var response = new Response<String>();
+		Optional<Lancamento> lancamento = lancamentoService.buscarById(id);
+
+		if (lancamento.isEmpty()) {
 			log.info("Error removing because of lancamento ID: {} to be invalid.", id);
-			response.getErrors().add("Error removing lancamento. Record not found for id" + id);
+			response.getErrors().add("Error removing lancamento. Record not found for id " + id);
 			return ResponseEntity.badRequest().body(response);
 		}
-		
-		this.lancamentoService.remover(id);
-		return ResponseEntity.ok(new Response<String>());
-	}
 
-	/**
-	 * Converts an entity release to its respective DTO.
-	 * 
-	 * @param lancamento
-	 * @param CadastraLancamentoDto
-	 * 
-	 */
+		lancamentoService.remover(id);
+		return ResponseEntity.ok(new Response<>());
+	}
 
 	private CadastroLancamentoDto convertLancamentoDto(Lancamento lancamento) {
-		
-		CadastroLancamentoDto cadastroLancamentoDto = new CadastroLancamentoDto();
-		cadastroLancamentoDto.setId(Optional.of(lancamento.getId()));
-		cadastroLancamentoDto.setData(this.dateFormat.format(lancamento.getData()));
-		cadastroLancamentoDto.setTipo(lancamento.getTipo().toString());
-		cadastroLancamentoDto.setDescricao(lancamento.getDescricao());
-		cadastroLancamentoDto.setLocalizacao(lancamento.getLocalizacao());
-		cadastroLancamentoDto.setFuncionarioId(lancamento.getFuncionario().getId());
-		
-
-		return cadastroLancamentoDto;
+		var dto = new CadastroLancamentoDto();
+		dto.setId(Optional.of(lancamento.getId()));
+		dto.setData(lancamento.getData().format(FORMATTER));
+		dto.setTipo(lancamento.getTipo().toString());
+		dto.setDescricao(lancamento.getDescricao());
+		dto.setLocalizacao(lancamento.getLocalizacao());
+		dto.setFuncionarioId(lancamento.getFuncionarioId());
+		return dto;
 	}
 
-	/**
-	 * Validate an official, verifying that it is existing and valid in the system.
-	 * 
-	 * @param result
-	 * @param CadastraLancamentoDto
-	 * 
-	 */
-
-	private void validaFuncionario(CadastroLancamentoDto cadastroLancamentoDto, BindingResult result) {
-		if (cadastroLancamentoDto.getFuncionarioId() == null) {
+	private void validaFuncionario(CadastroLancamentoDto dto, BindingResult result) {
+		if (dto.getFuncionarioId() == null) {
 			result.addError(new ObjectError("Employee", "Employee not found"));
 			return;
 		}
-
-		log.info("Validing employee id {}: ", cadastroLancamentoDto.getFuncionarioId());
-		Optional<Funcionario> funcionario = this.funcionarioService
-				.buscarPorId(cadastroLancamentoDto.getFuncionarioId());
-		if (!funcionario.isPresent()) {
-			result.addError(new ObjectError("Employee", "Employee not found. ID nonexistent."));
-		}
+		log.info("Validating employee id {}: ", dto.getFuncionarioId());
+		funcionarioService.buscarPorId(dto.getFuncionarioId())
+				.orElseGet(() -> {
+					result.addError(new ObjectError("Employee", "Employee not found. ID nonexistent."));
+					return null;
+				});
 	}
-	
-	/**
-	 * Converts one CadastroLancamentoDto to an entity Launch
-	 * 
-	 * @param cadastroLancamentoDto
-	 * @param result
-	 * @param Lancamento
-	 * @param ParseExecption
-	 * @throws java.text.ParseException 
-	 * 
-	 */
-	
-	private Lancamento convertDtoByLancamento(CadastroLancamentoDto cadastroLancamentoDto, BindingResult result) throws ParseException, java.text.ParseException{
-		Lancamento lancamento = new Lancamento();
-		
-		if(cadastroLancamentoDto.getId().isPresent()) {
-			Optional<Lancamento> lanc = this.lancamentoService.buscarById(cadastroLancamentoDto.getId().get());
-			if(lanc.isPresent()) {
+
+	private Lancamento convertDtoByLancamento(CadastroLancamentoDto dto, BindingResult result) {
+		var lancamento = new Lancamento();
+
+		if (dto.getId().isPresent()) {
+			Optional<Lancamento> lanc = lancamentoService.buscarById(dto.getId().get());
+			if (lanc.isPresent()) {
 				lancamento = lanc.get();
-			}else {
+			} else {
 				result.addError(new ObjectError("lancamento", "Launch not found."));
 			}
-			
-		}else {
-			lancamento.setFuncionario(new Funcionario());
-			lancamento.getFuncionario().setId(cadastroLancamentoDto.getFuncionarioId());
+		} else {
+			lancamento.setFuncionarioId(dto.getFuncionarioId());
 		}
-		
-		lancamento.setDescricao(cadastroLancamentoDto.getDescricao());
-		lancamento.setLocalizacao(cadastroLancamentoDto.getLocalizacao());
-		lancamento.setData(this.dateFormat.parse(cadastroLancamentoDto.getData()));
-		
-		if(EnumUtils.isValidEnum(TipoEnum.class, cadastroLancamentoDto.getTipo())) {
-			lancamento.setTipo(TipoEnum.valueOf(cadastroLancamentoDto.getTipo()));
-			
-		}else {
-			result.addError(new ObjectError("Tipo" , "Invalid type"));
+
+		lancamento.setDescricao(dto.getDescricao());
+		lancamento.setLocalizacao(dto.getLocalizacao());
+		lancamento.setData(LocalDateTime.parse(dto.getData(), FORMATTER));
+
+		if (EnumUtils.isValidEnum(TipoEnum.class, dto.getTipo())) {
+			lancamento.setTipo(TipoEnum.valueOf(dto.getTipo()));
+		} else {
+			result.addError(new ObjectError("Tipo", "Invalid type"));
 		}
 		return lancamento;
 	}

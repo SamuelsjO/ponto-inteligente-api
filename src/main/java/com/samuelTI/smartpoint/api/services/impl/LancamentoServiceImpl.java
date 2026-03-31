@@ -1,54 +1,57 @@
 package com.samuelTI.smartpoint.api.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.samuelTI.smartpoint.api.dtos.PageResult;
 import com.samuelTI.smartpoint.api.entities.Lancamento;
 import com.samuelTI.smartpoint.api.repository.LancamentoRepository;
 import com.samuelTI.smartpoint.api.services.LancamentoService;
 
-@Service
-public class LancamentoServiceImpl implements LancamentoService{
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-	private static final Logger log = LoggerFactory.getLogger(LancamentoServiceImpl.class);
-	
-	@Autowired
-	private LancamentoRepository lancamentoRepository;
-	
+@Slf4j
+@RequiredArgsConstructor
+@Service
+public class LancamentoServiceImpl implements LancamentoService {
+
+	private final LancamentoRepository lancamentoRepository;
+
 	@Override
-	public Page<Lancamento> buscarPorFuncionario(Long funcionarioId, PageRequest pageRequest){
-		log.info("Find launch ID {}", funcionarioId);
-		return this.lancamentoRepository.findByFuncionarioId(funcionarioId, pageRequest);
-		
+	public PageResult<Lancamento> buscarPorFuncionario(Long funcionarioId, int page, int size) {
+		log.info("Find launches by employee ID {}", funcionarioId);
+		List<Lancamento> all = lancamentoRepository.findByFuncionarioId(funcionarioId);
+		return PageResult.of(all, page, size);
 	}
-	
+
 	@Override
 	@Cacheable("launchById")
-	public Optional<Lancamento> buscarById(Long id){
-		log.info("Find on launch by ID{}", id);
-		return this.lancamentoRepository.findById(id);
+	public Optional<Lancamento> buscarById(Long id) {
+		log.info("Find launch by ID {}", id);
+		return lancamentoRepository.findById(id);
 	}
-	
+
 	@Override
 	@CachePut("launchById")
 	public Lancamento persitir(Lancamento lancamento) {
-		log.info("Persisting the launch: {}", lancamento);
-		return this.lancamentoRepository.save(lancamento);
+		log.info("Persisting launch: {}", lancamento);
+		var agora = LocalDateTime.now();
+		if (lancamento.getId() == null) {
+			lancamento.setDataCriacao(agora);
+		}
+		lancamento.setDataAtualizacao(agora);
+		return lancamentoRepository.save(lancamento);
 	}
-	
+
 	@Override
 	public void remover(Long id) {
-		log.info("Remove launch ID{}", id);
-		this.lancamentoRepository.deleteById(id);
+		log.info("Removing launch ID {}", id);
+		lancamentoRepository.deleteById(id);
 	}
-
-
 }

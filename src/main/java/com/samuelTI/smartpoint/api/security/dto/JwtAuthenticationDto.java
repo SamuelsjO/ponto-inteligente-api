@@ -1,38 +1,14 @@
 package com.samuelTI.smartpoint.api.security.dto;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 
-public class JwtAuthenticationDto {
+public record JwtAuthenticationDto(
+		@NotEmpty(message = "Email can not be empty.")
+		@Email(message = "Invalid Email.")
+		String email,
 
-	private String email;
-	private String senha;
-
-	public JwtAuthenticationDto() {
-	}
-
-	@NotEmpty(message = "Email can not be empty.")
-	@Email(message = "Invalid Email.")
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	@NotEmpty(message = "Password can not be empty.")
-	public String getSenha() {
-		return senha;
-	}
-
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
-
-	@Override
-	public String toString() {
-		return "JwtAuthenticationRequestDto [email=" + email + ", senha=" + senha + "]";
-	}
-
+		@NotEmpty(message = "Password can not be empty.")
+		String senha
+) {
 }
